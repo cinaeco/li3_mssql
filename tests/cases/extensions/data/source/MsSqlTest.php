@@ -32,17 +32,17 @@ class MsSqlTest extends \lithium\test\Unit {
      */
 
 	public function skip() {
-		$this->_dbConfig = Connections::get('test', array('config' => true));
+		$this->_dbConfig = Connections::get('mssql_test', array('config' => true));
 		$isAvailable = (
 				$this->_dbConfig &&
-						Connections::get('test')->isConnected(array('autoConnect' => true))
+						Connections::get('mssql_test')->isConnected(array('autoConnect' => true))
 		);
 		$this->skipIf(!$isAvailable, "No test connection available.");
 
-		$isDatabase = Connections::get('test') instanceof \lithium\data\source\Database;
+		$isDatabase = Connections::get('mssql_test') instanceof \lithium\data\source\Database;
 		$this->skipIf(!$isDatabase, "The 'test' connection is not a relational database.");
 
-		$this->db = Connections::get('test');
+		$this->db = Connections::get('mssql_test');
 		$mockBase = LITHIUM_LIBRARY_PATH . '/li3_mssql/tests/mocks/extensions/data/source/database/adapter/';
 		$files = array('companies' => '_companies.sql');
 		$files = array_diff_key($files, array_flip($this->db->sources()));
