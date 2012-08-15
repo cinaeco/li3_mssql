@@ -252,6 +252,42 @@ class MsSql extends \lithium\data\source\Database {
         return parent::create($query, $options);
     }
 
+	public function read($query, array $options = array()) {
+        if($query->page() > 1) {
+            $model = is_object($query) ? $query->model() : null;
+
+            if($model) {
+                $name = $model::meta('name');
+                $key = $model::key();
+
+                $subQuery = $this->invokeMethod('_instance', array(
+                        get_class($query), array(
+                            'type' => 'paged',
+                            'model' => $model,
+                            'group' => "{$name}.{$key}",
+                            'fields' => array("{$name}.{$key}"),
+                            'joins' => $query->joins(),
+                            'conditions' => $query->conditions(),
+                            'limit' => $query->limit(),
+                            'page' => $query->page(),
+                            'order' => $query->order() ?: "{$name}.{$key}"
+                        )
+                    ));
+                $ids = parent::read($subQuery, array('subquery' => true));
+                if (!$ids->count()) {
+                    return false;
+                }
+                $idData = $ids->data();
+                $ids = array_map(function($index) use ($key) {
+                        return $index[$key];
+                    }, $idData);
+                $query->limit(false)->conditions(array("{$name}.{$key}" => $ids));
+            }
+        }
+
+        return parent::read($query, $options);
+    }
+
     protected function _execute($sql, array $options = array()) {
         $defaults = array();
         $options += $defaults;
