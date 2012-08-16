@@ -253,10 +253,8 @@ class MsSql extends \lithium\data\source\Database {
     }
 
 	public function read($query, array $options = array()) {
-        if($query->page() > 1) {
-            $model = is_object($query) ? $query->model() : null;
-
-            if($model) {
+        if(is_object($query) && $query->page() > 1) {
+            if($model = $query->model()) {
                 $name = $model::meta('name');
                 $key = $model::key();
 
